@@ -1,0 +1,8 @@
+name: Autosort
+version: ${project.version}
+main: io.captncraig.autosort.Autosort
+api-version: 1.13
+commands:
+  autosort:
+    description: "Autosort commands"
+    usage: /autosort [tool]

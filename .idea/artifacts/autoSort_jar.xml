@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="autoSort:jar">
+    <output-path>$PROJECT_DIR$/spigot/plugins</output-path>
+    <root id="archive" name="autoSort.jar">
+      <element id="module-output" name="autoSort" />
+    </root>
+  </artifact>
+</component>
