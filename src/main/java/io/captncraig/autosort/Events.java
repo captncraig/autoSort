@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,6 +16,9 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockDataMeta;
+import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
@@ -38,7 +42,6 @@ public class Events implements Listener {
 
         Player p = e.getPlayer();
         ItemFrame iframe = (ItemFrame) e.getRightClicked();
-        //p.sendMessage(String.format("%s", iframe.getItem().getType()));
     }
 
     @EventHandler
@@ -52,7 +55,7 @@ public class Events implements Listener {
     }
 
     private  void Drain(Chest c){
-        Collection<FrameOnThing> nearby = getFramesAround(c.getBlock(),50,500);
+        Collection<FrameOnThing> nearby = getFramesAround(c.getBlock(),14,500);
         Collection<FrameOnThing> allPossible = new ArrayList<>(nearby.size());
         for(FrameOnThing fot : nearby){
             if (fot.holderLoc.equals(c.getLocation())){
@@ -61,14 +64,30 @@ public class Events implements Listener {
             allPossible.add(fot);
         }
         Matcher m = new Matcher(allPossible, _plugin);
-        Inventory snapshot = c.getSnapshotInventory();
+        drainInventoryContainer(m,c);
+    }
+
+    private void drainInventoryContainer(Matcher m, InventoryHolder c){
+        Inventory snapshot = c.getInventory();
         for (int i = 0; i< snapshot.getSize(); i++){
             // find what we got
             ItemStack stack = snapshot.getItem(i);
             if (stack == null) continue;
+            // empty shulkerbox
+            ItemMeta im = stack.getItemMeta();
+            if (im instanceof BlockStateMeta){
+                BlockStateMeta bsm = (BlockStateMeta) im;
+                BlockState bs = bsm.getBlockState();
+                if (bs instanceof ShulkerBox){
+                    ShulkerBox sb = (ShulkerBox)bs;
+                    drainInventoryContainer(m, sb);
+                    bsm.setBlockState(sb);
+                    stack.setItemMeta(bsm);
+                    return;
+                }
+            }
             // get rid of it
             int remaining = m.disposeOf(stack);
-
             // delete it (or put back unroutable garbage)
             stack.setAmount(remaining);
             if (remaining == 0){
