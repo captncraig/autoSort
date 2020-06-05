@@ -83,7 +83,7 @@ public class Events implements Listener {
                     drainInventoryContainer(m, sb);
                     bsm.setBlockState(sb);
                     stack.setItemMeta(bsm);
-                    return;
+                    continue;
                 }
             }
             // get rid of it
